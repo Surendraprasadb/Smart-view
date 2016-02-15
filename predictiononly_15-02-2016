@@ -1,0 +1,195 @@
+import pickle
+import os
+import operator
+
+#global declaration of lists, dictionary and string
+text = []
+string=""
+predict1=[]
+predict2=[]
+predict3=[]
+predict4=[]
+predict11={}
+predict22={}
+predict33={}
+predict44={}
+main_dict = {}
+
+
+#loading the dictionary
+with open("C:\dist\text\main_dict.txt", "rb") as z:
+    main_dict=pickle.load(z)
+
+
+#predicting the next word by searching the available keys
+def predict():
+    predict11={}
+    predict22={}
+    predict33={}
+    predict44={}
+
+    #clearing the predict dictionaries
+    predict11.clear()
+    predict22.clear()
+    predict33.clear()
+    predict44.clear()
+
+    global predict1
+    global predict2
+    global predict3
+    global predict4
+    global text
+    predict1=[]
+    predict2=[]
+    predict3=[]
+    predict4=[]
+    string=" ".join(text)
+    string1=string.split(" ")
+    slen=len(string1)
+
+    predict1=main_dict[string1[slen-1]].keys()
+        
+    if slen>1:
+        if string1[slen-1] not in main_dict[string1[slen-2]].keys():
+            del text[0]
+            if len(predict2)>0:
+                for i in predict2:
+                    predict2.pop()
+        else:
+            predict2=main_dict[string1[slen-2]][string1[slen-1]].keys()
+           
+    string=" ".join(text)
+    string1=string.split(" ")
+    slen=len(string1)
+    
+    if slen>2:
+        if string1[slen-1] not in main_dict[string1[slen-3]][string1[slen-2]].keys():
+            del text[1]
+            del text[0]
+            if len(predict3)>0:
+                for i in predict3:
+                    predict3.pop()
+        else:
+            predict3=main_dict[string1[slen-3]][string1[slen-2]][string1[slen-1]].keys()
+
+    string=" ".join(text)
+    string1=string.split(" ")
+    slen=len(string1)    
+   
+    if slen>3:
+        if string1[slen-1] not in main_dict[string1[slen-4]][string1[slen-3]][string1[slen-2]].keys():
+            del text[2]
+            del text[1]
+            del text[0]
+            if len(predict4)>0:
+                for i in predict4:
+                    predict4.pop()
+        else:
+            predict4=main_dict[string1[slen-4]][string1[slen-3]][string1[slen-2]][string1[slen-1]].keys()
+
+    
+    #removing repeated keys from the predicted lists
+    for i in predict2:
+        for j in predict1:
+            if i == j:
+                predict1.remove(j)
+                break
+            
+    for i in predict3:
+        for j in predict2:
+            if i == j:
+                predict2.remove(j)
+            
+    for i in predict4:
+        for j in predict3:
+            if i == j:
+                predict3.remove(j)
+                
+
+    #creating the perdict dictionayfrom the main dictionary.
+    for i in predict1:
+        if i != 'value':
+            predict11.update({i:main_dict[string1[slen-1]][str(i)]['value']})
+    for i in predict2:
+        if i != 'value':
+            predict22.update({i:main_dict[string1[slen-2]][string1[slen-1]][str(i)]['value']})
+    for i in predict3:
+        if i != 'value':
+            predict33.update({i:main_dict[string1[slen-3]][string1[slen-2]][string1[slen-1]][str(i)]['value']})
+    for i in predict4:
+        if i != 'value':
+            predict44.update({i:main_dict[string1[slen-4]][string1[slen-3]][string1[slen-2]][string1[slen-1]][i]['value']})    
+            
+
+    #removing the unwanted value key from the 
+    for i in predict1:
+        if i=='value':
+            predict1.remove('value')
+    for i in predict2:
+        if i=='value':
+            predict2.remove('value')
+    for i in predict3:
+        if i=='value':
+            predict3.remove('value')
+    for i in predict4:
+        if i=='value':
+            predict4.remove('value')
+   
+   
+    sort_predict1= sorted(predict11.items(),key=operator.itemgetter(1))
+    sort_predict2= sorted(predict22.items(),key=operator.itemgetter(1))
+    sort_predict3= sorted(predict33.items(),key=operator.itemgetter(1))
+    sort_predict4= sorted(predict44.items(),key=operator.itemgetter(1))
+    sort_predict1.reverse()
+    sort_predict2.reverse()
+    sort_predict3.reverse()
+    sort_predict4.reverse()
+
+    
+    for i in range(len(sort_predict4)):
+        print sort_predict4[i][0]
+    for i in range(len(sort_predict3)):
+        print sort_predict3[i][0]
+    for i in range(len(sort_predict2)):
+        print sort_predict2[i][0]
+    for i in range(len(sort_predict1)):
+        print sort_predict1[i][0]
+
+    #clearing the predict dictionaries
+    predict11.clear()
+    predict22.clear()
+    predict33.clear()
+    predict44.clear()
+
+
+while True:
+
+    print "\n"
+    if(len(text)>0):
+        for i in text: print i,
+    g=raw_input(" ")
+
+    #clearing console
+    clear = lambda: os.system('cls')
+    clear()
+    print "\n"
+
+    #checking for stop and exit after dumping
+    if g == "stop":
+        break
+    
+    #checking for words not used in input text file
+    if g not in main_dict.keys():
+        for i in text:
+            text.remove(i)
+        for i in xrange(len(text)):
+            text.pop()   
+        continue
+    
+    text.append(g)
+    if len(text)>4:
+        del text[0]
+    predict()
+    
+print "stopped"
+
