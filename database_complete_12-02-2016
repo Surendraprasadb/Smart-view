@@ -1,0 +1,90 @@
+import pickle
+main_dict = {}
+
+#function for initialising the elements of list in the dictionary
+def init_dict(ylists):
+    for i in ylists:
+        if i in main_dict.keys():
+            main_dict[i]['value']+=1
+        else:
+            main_dict[i]={'value':1}   
+
+
+#function for updating the dictionary with nested dictionaries
+def update_dict(xlists):
+   length=len(xlists) 
+   for x in xrange(length):
+
+        if x < (length-1):
+
+            if type(main_dict[str(xlists[x])])!= dict:
+                main_dict[str(xlists[x])]={}        
+            
+            if xlists[x+1] not in main_dict[str(xlists[x])].keys():
+                main_dict[xlists[x]].update({str(xlists[x+1]):{'value':1}})
+            else:
+                main_dict[xlists[x]][xlists[x+1]]['value'] += 1
+
+        if x < (length-2):
+
+            if type(main_dict[str(xlists[x])][str(xlists[x+1])]) != dict:
+                main_dict[str(xlists[x])][str(xlists[1+x])]={}
+
+            if xlists[x+2] not in main_dict[str(xlists[x])][str(xlists[x+1])].keys():
+                main_dict[xlists[x]][xlists[x+1]].update({str(xlists[x+2]):{'value':1}})
+            else:
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]]['value'] += 1
+
+        if x < (length-3):
+
+            if type(main_dict[xlists[x]][xlists[x+1]][xlists[x+2]])!=dict:
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]]={}
+                                                     
+            if xlists[x+3] not in main_dict[xlists[x]][xlists[x+1]][xlists[x+2]].keys():
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]].update({str(xlists[x+3]):{'value':1}})
+            else:
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]][xlists[x+3]]['value'] += 1
+
+
+        if x < (length-4):
+            if type(main_dict[xlists[x]][xlists[x+1]][xlists[x+2]][xlists[3+x]]) != dict:
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]][xlists[x+3]]={}
+                
+            if xlists[x+4] not in main_dict[xlists[x]][xlists[x+1]][xlists[x+2]][xlists[3+x]].keys():
+                main_dict[xlists[x]][xlists[x+1]][xlists[2+x]][xlists[x+3]].update({str(xlists[4+x]):{'value':1}})
+            else:
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]][xlists[x+3]][xlists[x+4]]['value'] += 1
+
+
+
+#reading input from the text file
+a=open("C:\Users\Senthilnathan\Desktop\surendar\input.txt","r")
+datain=a.read()
+datain=datain.replace(",", "")
+datain=datain.replace(".", "\n")
+lists=datain.split(" ")
+length=len(lists)
+a.close()
+
+
+b=open("C:\Users\Senthilnathan\Desktop\surendar\output1.txt","w")
+for i in lists:
+    b.write(i);
+    b.write(" ")
+b.close()
+
+with open("C:\Users\Senthilnathan\Desktop\surendar\output1.txt") as f:
+    lines = f.readlines()
+    for line in lines:
+        
+        init_dict(line.strip().split(" "))
+        update_dict(line.strip().split(" "))
+#clearing the contents of output1
+with open("C:\Users\Senthilnathan\Desktop\surendar\output1.txt","w") as k: pass        
+        
+
+with open("C:\Users\Senthilnathan\Desktop\surendar\main_dict.txt", "w") as myFile:
+    pickle.dump(main_dict, myFile)
+   
+for i in main_dict.keys():
+    print i,main_dict[i]
