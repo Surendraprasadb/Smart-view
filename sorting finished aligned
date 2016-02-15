@@ -1,0 +1,272 @@
+import pickle
+import os
+import operator
+
+#global declaration of lists, dictionary and string
+text = []
+string=""
+predict1=[]
+predict2=[]
+predict3=[]
+predict4=[]
+predict11={}
+predict22={}
+predict33={}
+predict44={}
+main_dict = {}
+
+#reading input from the text file
+a=open("C:\Users\Senthilnathan\Desktop\surendar\input.txt","r")
+datain=a.read()
+datain=datain.replace(",", "")
+datain=datain.replace(".", "")
+lists=datain.split(" ")
+length=len(lists)
+a.close()
+
+
+"""
+commmand for clearing the input text file
+#with open('input.txt', 'w'): pass
+"""
+
+
+#function for initialising the elements of list in the dictionary
+
+def init_dict(ylists):
+    for i in ylists:
+        if i in main_dict.keys():
+            main_dict[i]['value']+=1
+        else:
+            main_dict[i]={'value':1}   
+
+
+
+#function for updating the dictionary with nested dictionaries
+
+def update_dict(xlists):
+   length=len(xlists) 
+   for x in xrange(length):
+
+        if x < (length-1):
+
+            if type(main_dict[str(xlists[x])])!= dict:
+                main_dict[str(xlists[x])]={}        
+            
+            if xlists[x+1] not in main_dict[str(xlists[x])].keys():
+                main_dict[xlists[x]].update({str(xlists[x+1]):{'value':1}})
+            else:
+                main_dict[xlists[x]][xlists[x+1]]['value'] += 1
+
+        if x < (length-2):
+
+            if type(main_dict[str(xlists[x])][str(xlists[x+1])]) != dict:
+                main_dict[str(xlists[x])][str(xlists[1+x])]={}
+
+            if xlists[x+2] not in main_dict[str(xlists[x])][str(xlists[x+1])].keys():
+                main_dict[xlists[x]][xlists[x+1]].update({str(xlists[x+2]):{'value':1}})
+            else:
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]]['value'] += 1
+
+        if x < (length-3):
+
+            if type(main_dict[xlists[x]][xlists[x+1]][xlists[x+2]])!=dict:
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]]={}
+                                                     
+            if xlists[x+3] not in main_dict[xlists[x]][xlists[x+1]][xlists[x+2]].keys():
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]].update({str(xlists[x+3]):{'value':1}})
+            else:
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]][xlists[x+3]]['value'] += 1
+
+
+        if x < (length-4):
+            if type(main_dict[xlists[x]][xlists[x+1]][xlists[x+2]][xlists[3+x]]) != dict:
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]][xlists[x+3]]={}
+                
+            if xlists[x+4] not in main_dict[xlists[x]][xlists[x+1]][xlists[x+2]][xlists[3+x]].keys():
+                main_dict[xlists[x]][xlists[x+1]][xlists[2+x]][xlists[x+3]].update({str(xlists[4+x]):{'value':1}})
+            else:
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]][xlists[x+3]][xlists[x+4]]['value'] += 1
+
+"""
+predict11={}
+predict22={}
+predict33={}
+predict44={}"""
+
+
+#predicting the next word by searching the available keys
+def predict(string):
+    predict11={}
+    predict22={}
+    predict33={}
+    predict44={}
+
+    #clearing the predict dictionaries
+    predict11.clear()
+    predict22.clear()
+    predict33.clear()
+    predict44.clear()
+
+    global predict1
+    global predict2
+    global predict3
+    global predict4
+    global text
+    predict1=[]
+    predict2=[]
+    predict3=[]
+    predict4=[]
+    string1=string.split(" ")
+    slen=len(string1)
+    
+    
+
+    predict1=main_dict[string1[slen-1]].keys()
+    
+        
+    if slen>1:
+        predict2=main_dict[string1[slen-2]][string1[slen-1]].keys()
+           
+
+    if slen>2:
+        predict3=main_dict[string1[slen-3]][string1[slen-2]][string1[slen-1]].keys()
+        
+   
+    if slen>3:
+        predict4=main_dict[string1[slen-4]][string1[slen-3]][string1[slen-2]][string1[slen-1]].keys()
+
+
+    #removing repeated keys from the predicted lists
+    for i in predict2:
+        for j in predict1:
+            if i == j:
+                predict1.remove(j)
+                break
+            
+            
+    for i in predict3:
+        for j in predict2:
+            if i == j:
+                predict2.remove(j)
+            
+
+    for i in predict4:
+        for j in predict3:
+            if i == j:
+                predict3.remove(j)
+
+    #creating the perdict dictionayfrom the main dictionary.
+                
+    for i in predict1:
+        if i != 'value':
+            predict11.update({i:main_dict[string1[slen-1]][str(i)]['value']})
+
+    for i in predict2:
+        if i != 'value':
+            predict22.update({i:main_dict[string1[slen-2]][string1[slen-1]][str(i)]['value']})
+
+    for i in predict3:
+        if i != 'value':
+            predict33.update({i:main_dict[string1[slen-3]][string1[slen-2]][string1[slen-1]][str(i)]['value']})
+
+    for i in predict4:
+        if i != 'value':
+            predict44.update({i:main_dict[string1[slen-4]][string1[slen-3]][string1[slen-2]][string1[slen-1]][i]['value']})    
+            
+
+    #removing the unwanted value key from the 
+
+    for i in predict1:
+        if i=='value':
+            predict1.remove('value')
+    for i in predict2:
+        if i=='value':
+            predict2.remove('value')
+    for i in predict3:
+        if i=='value':
+            predict3.remove('value')
+    for i in predict4:
+        if i=='value':
+            predict4.remove('value')
+   
+   
+    sort_predict1= sorted(predict11.items(),key=operator.itemgetter(1))
+    sort_predict2= sorted(predict22.items(),key=operator.itemgetter(1))
+    sort_predict3= sorted(predict33.items(),key=operator.itemgetter(1))
+    sort_predict4= sorted(predict44.items(),key=operator.itemgetter(1))
+
+    
+    sort_predict1.reverse()
+    sort_predict2.reverse()
+    sort_predict3.reverse()
+    sort_predict4.reverse()
+
+    for i in range(len(sort_predict4)):
+        print sort_predict4[i][0]
+    for i in range(len(sort_predict3)):
+        print sort_predict3[i][0]
+    for i in range(len(sort_predict2)):
+        print sort_predict2[i][0]
+    for i in range(len(sort_predict1)):
+        print sort_predict1[i][0]
+
+    #clearing the predict dictionaries
+    predict11.clear()
+    predict22.clear()
+    predict33.clear()
+    predict44.clear()
+
+    
+init_dict(lists)
+update_dict(lists)
+
+
+while True:
+    
+    print "\n"
+    
+    #loading the dictionary
+    with open("C:\Users\Senthilnathan\Desktop\surendar\main_dict.txt", "rb") as z:
+        main_dict=pickle.load(z)
+    if(len(text)>0):
+        for i in text: print i,
+    g=raw_input(" ")
+
+
+
+    #clearing console
+    clear = lambda: os.system('cls')
+    clear()
+    print "\n"
+
+
+
+    #checking for stop and exit after dumping
+    if g == "stop":
+        with open("C:\Users\Senthilnathan\Desktop\surendar\main_dict.txt", "wb") as myFile:
+            pickle.dump(main_dict, myFile)
+        break
+
+
+    
+    #checking for words not used in input text file
+
+    if g not in main_dict.keys():
+        
+        for i in text:
+            text.remove(i)
+        text.pop()   
+        continue
+    
+    text.append(g)
+    if len(text)>4:
+        del text[0]
+    v=" ".join(text)
+    predict(v)
+    with open("C:\Users\Senthilnathan\Desktop\surendar\main_dict.txt", "wb") as myFile:
+        pickle.dump(main_dict, myFile)
+    with open("C:\Users\Senthilnathan\Desktop\surendar\main_dict.txt", "rb") as z:
+        main_dict=pickle.load(z)
+
+print "stopped"
