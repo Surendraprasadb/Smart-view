@@ -1,0 +1,100 @@
+import pickle   #for storing and retriving the dictionary from text file
+import os
+main_dict = {}  #declaring main_dict
+
+#function for initialising the elements of list in the dictionary
+def init_dict(ylists):
+    for i in ylists:
+        if i in main_dict.keys():                   #check wether the element is a key or not
+            main_dict[i]['value1']+=1                #if yes increment value
+        else:                                       #else update the dictionary with the value
+            main_dict[i]={'value1':1}   
+
+
+#function for updating the dictionary with nested dictionaries
+def update_dict(xlists):
+   length=len(xlists) 
+   for x in xrange(length):                         #iterating for every element
+
+        if x < (length-1):
+
+            if type(main_dict[str(xlists[x])])!= dict:      #checking for dict data type
+                main_dict[str(xlists[x])]={}                #making the element as dict data type
+            
+            if xlists[x+1] not in main_dict[str(xlists[x])].keys():             #check wether the element is a key of nested dict
+                main_dict[xlists[x]].update({str(xlists[x+1]):{'value1':1}})     # if no update the key of the nested dictionary    
+            else:
+                main_dict[xlists[x]][xlists[x+1]]['value1'] += 1                 #if yes update the value
+
+        if x < (length-2):
+
+            if type(main_dict[str(xlists[x])][str(xlists[x+1])]) != dict:       #checking for dict data type    
+                main_dict[str(xlists[x])][str(xlists[1+x])]={}                  #making the element as dict data type
+
+            if xlists[x+2] not in main_dict[str(xlists[x])][str(xlists[x+1])].keys():       #check wether the element is a key of double nested dict
+                main_dict[xlists[x]][xlists[x+1]].update({str(xlists[x+2]):{'value1':1}})    # if no update the key of the double nested dictionary 
+            else:
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]]['value1'] += 1                #if yes update the value
+
+        if x < (length-3):
+
+            if type(main_dict[xlists[x]][xlists[x+1]][xlists[x+2]])!=dict:          #checking for dict data type 
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]]={}                   #making the element as dict data type
+                                                     
+            if xlists[x+3] not in main_dict[xlists[x]][xlists[x+1]][xlists[x+2]].keys():        #check wether the element is a key of triple nested dict
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]].update({str(xlists[x+3]):{'value1':1}}) # if no update the key of the triple nested dictionary
+            else:
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]][xlists[x+3]]['value1'] += 1           #if yes update the value
+
+
+        if x < (length-4):
+            if type(main_dict[xlists[x]][xlists[x+1]][xlists[x+2]][xlists[3+x]]) != dict:   #checking for dict data type
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]][xlists[x+3]]={}              #making the element as dict data type
+                
+            if xlists[x+4] not in main_dict[xlists[x]][xlists[x+1]][xlists[x+2]][xlists[3+x]].keys(): #check wether the element is a key of four nested dict
+                main_dict[xlists[x]][xlists[x+1]][xlists[2+x]][xlists[x+3]].update({str(xlists[4+x]):{'value1':1}}) # if no update the key of the four nested dictionary
+            else:
+                main_dict[xlists[x]][xlists[x+1]][xlists[x+2]][xlists[x+3]][xlists[x+4]]['value1'] += 1      #if yes update the value
+
+
+os.chdir("C:\Users\Senthilnathan\Desktop\surendar\Text")
+#reading input from the text file
+filelist=["abcd1.txt","abcd2.txt","abcd3.txt"]
+for i in filelist:
+    a=open(i,"r")
+    datain=a.read()
+    datain=datain.lower()
+    datain = "".join(c for c in datain if c not in ('!',',','(',')',';','?','"','*',':','-','=','@','/','&'))   #removing all unneccary special characters 
+    datain=datain.replace("  ", " ")
+    datain=datain.replace(".", "\n")                                                            #replacing all full stops by a newline
+    lists=datain.strip().split(" ")                                                             #converting in to a list
+    length=len(lists)
+    datain=""
+    a.close()
+
+
+    b=open("C:\Users\Senthilnathan\Desktop\surendar\output1.txt","w")
+    for i in lists:
+        b.write(i);
+        b.write(" ")                            #writing the refined text in a new file    
+    b.close()
+
+    with open("C:\Users\Senthilnathan\Desktop\surendar\output1.txt") as f:    
+        lines = f.readlines()
+        for line in lines:                      #reading line by line and updating the dictionary
+            temp= line.strip().split(" ")
+            init_dict(temp)
+            update_dict(temp)
+
+    #with open("C:\Users\Senthilnathan\Desktop\surendar\output1.txt","w") as k: pass
+                                            #clearing the new text file for saving memmory
+
+
+
+
+
+    
+with open("C:\Users\Senthilnathan\Desktop\surendar\main_dict.txt", "w") as myFile:
+        pickle.dump(main_dict, myFile)          #dumping the dictionary in the text file   
+#for i in main_dict.keys():
+#    print i,main_dict[i]
