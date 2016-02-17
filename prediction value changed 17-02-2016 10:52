@@ -1,0 +1,262 @@
+import pickle       #for dumping and retriving the dictionary from the text file
+import os           #for clearing console
+import operator     #for sorting the dictionary according to the weightage
+
+#global declaration of lists, dictionary and string
+text = []
+string=""
+predict1=[]
+predict2=[]
+predict3=[]
+predict4=[]
+predict11={}
+predict22={}
+predict33={}
+predict44={}
+main_dict = {}
+
+
+#loading the dictionary
+with open("C:\Users\Senthilnathan\Desktop\surendar\main_dict.txt", "r") as z:
+    main_dict=pickle.load(z)
+
+
+#predicting the next word by searching the available keys
+def predict():
+   
+    #clearing the predict dictionaries
+    predict11.clear()
+    predict22.clear()
+    predict33.clear()
+    predict44.clear()
+    
+    #accessing global variables inside function
+    global string
+    global predict1
+    global predict2
+    global predict3
+    global predict4
+    global text
+    predict1=[]
+    predict2=[]
+    predict3=[]
+    predict4=[]
+
+    
+    string=" ".join(text)           #converting "text" list in to string 
+    string1=string.split(" ")       #splitting the string in to list
+    slen=len(string1)               #finding the length of the string
+    predict1=main_dict[string1[slen-1]].keys()  #Storing the keys of the single nested dictionary of the input word as key in predict1
+        
+    if slen>1:                      
+        if string1[slen-1] not in main_dict[string1[slen-2]].keys(): #checking wether the input word is a key of single nested dictionary
+            temp=text.pop()                                          #if not delete the older keys               
+            for i in text:                              
+                text.remove(i)
+            for i in xrange(len(text)):
+                text.pop()
+            text.append(temp)                                        #keep only the new key                   
+            
+            if len(predict2)>0:
+                for i in predict2:                                   #clear the predict2 list
+                    predict2.pop()
+        else:                                                        #else                
+            predict2=main_dict[string1[slen-2]][string1[slen-1]].keys() #Storing predict2 as the keys of the double nested
+                                                                        #dictionary of the input text as key 
+
+
+    string=" ".join(text)           #converting "text" list in to string 
+    string1=string.split(" ")       #splitting the string in to list
+    slen=len(string1)               #finding the length of the string
+    if slen>2:
+        if string1[slen-1] not in main_dict[string1[slen-3]][string1[slen-2]].keys():  #checking wether the input word is a key of double nested dictionary
+            temp=text.pop()                                                            #if not delete the older keys
+            temp1=text.pop()
+            for i in text:
+                text.remove(i)
+            for i in xrange(len(text)):
+                text.pop()
+            text.append(temp1)                                                          #keep only the new valid keys 
+            text.append(temp)
+            if len(predict3)>0:                                                         #clear the predict3 list    
+                for i in predict3:
+                    predict3.pop()
+        else:                                                                           #else 
+            predict3=main_dict[string1[slen-3]][string1[slen-2]][string1[slen-1]].keys()    #Store predict3 as the keys of the triple nested
+                                                                                            #dictionary of the input text as key
+            
+
+    string=" ".join(text)           #converting "text" list in to string 
+    string1=string.split(" ")       #splitting the string in to list
+    slen=len(string1)               #finding the length of the string    
+    if slen>3:
+        if string1[slen-1] not in main_dict[string1[slen-4]][string1[slen-3]][string1[slen-2]].keys():#checking wether the input word is a
+                                                                                                      #key of triple nested dictionary  
+            temp=text.pop()                                                                           #if not delete the older keys      
+            temp1=text.pop()
+            temp2=text.pop()
+            for i in text:
+                text.remove(i)
+            for i in xrange(len(text)):
+                text.pop()
+            text.append(temp2)    
+            text.append(temp1)                                                                        #keep only the new valid keys                     
+            text.append(temp)
+            if len(predict4)>0:
+                for i in predict4:
+                    predict4.pop()                                                                    #clear the predict4 list  
+        else:                                                                                         #else  
+            predict4=main_dict[string1[slen-4]][string1[slen-3]][string1[slen-2]][string1[slen-1]].keys()
+                                                                                            #Store predict4 as the keys of the four nested
+                                                                                            #dictionary of the input text as key
+    
+
+
+
+
+    
+def refine_predict():
+
+    global predict1             #accessing global variables inside function
+    global predict2      
+    global predict3
+    global predict4
+    
+   
+    for i in predict2:
+        for j in predict1:
+            if i == j:                #checking for repeated keys                   
+                predict1.remove(j)    #removing repeated keys  
+                break
+            
+    for i in predict3:
+        for j in predict2:
+            if i == j:                #checking for repeated keys
+                predict2.remove(j)    #removing repeated keys  
+            
+    for i in predict4:
+        for j in predict3:
+            if i == j:                #checking for repeated keys  
+                predict3.remove(j)    #removing repeated keys    
+                
+    
+    for i in predict1:
+        if i=='value1':                                                          
+            predict1.remove('value1')    #removing the unwanted value key from the predict1 list
+    for i in predict2:
+        if i=='value1':
+            predict2.remove('value1')    #removing the unwanted value key from the predict2 list
+    for i in predict3:
+        if i=='value1':
+            predict3.remove('value1')    #removing the unwanted value key from the predict3 list
+    for i in predict4:
+        if i=='value1':
+            predict4.remove('value1')    #removing the unwanted value key from the predict4 list
+    
+                
+def create_predict_dict():
+
+    global predict1                     #accessing global variables inside function
+    global predict2
+    global predict3
+    global predict4
+    global text
+    global string
+    string=" ".join(text)           #converting "text" list in to string 
+    string1=string.split(" ")       #splitting the string in to list
+    slen=len(string1)               #finding the length of the string
+    
+    #creating the perdict dictionayfrom the main dictionary.
+    for i in predict1:
+        if i != 'value1':
+            predict11.update({i:main_dict[string1[slen-1]][str(i)]['value1']})   #updating the predicted single nested keys with
+                                                                                # its value in the predict11 dictionary
+    for i in predict2:
+        if i != 'value1':
+            predict22.update({i:main_dict[string1[slen-2]][string1[slen-1]][str(i)]['value1']})  #updating the predicted double nested keys with
+                                                                                                # its value in the predict22 dictionary
+    for i in predict3:
+        if i != 'value1':
+            predict33.update({i:main_dict[string1[slen-3]][string1[slen-2]][string1[slen-1]][str(i)]['value1']})     #updating the predicted triple
+                                                                                                                    #nested keys with its value in 
+                                                                                                                    #the predict33 dictionary
+    for i in predict4:
+        if i != 'value1':
+            predict44.update({i:main_dict[string1[slen-4]][string1[slen-3]][string1[slen-2]][string1[slen-1]][i]['value1']})     #updating the predicted 
+                                                                                                                                #triple nested keys with its  
+                                                                                                                                #value in the predict33
+                                                                                                                                #dictionary    
+            
+    
+    
+   
+def print_sort_dict():
+
+    sort_predict1= sorted(predict11.items(),key=operator.itemgetter(1)) #sorting the dictionary11 in ascending oreder of the value and storing in a list
+    sort_predict2= sorted(predict22.items(),key=operator.itemgetter(1)) #sorting the dictionary22 in ascending oreder of the value and storing in a list
+    sort_predict3= sorted(predict33.items(),key=operator.itemgetter(1)) #sorting the dictionary33 in ascending oreder of the value and storing in a list
+    sort_predict4= sorted(predict44.items(),key=operator.itemgetter(1)) #sorting the dictionary44 in ascending oreder of the value and storing in a list
+    sort_predict1.reverse()     #reversing in to descending order
+    sort_predict2.reverse()     #reversing in to descending order    
+    sort_predict3.reverse()     #reversing in to descending order        
+    sort_predict4.reverse()     #reversing in to descending order    
+
+    print "predict 4 \n"
+    for i in range(len(sort_predict4)):         #printing four word prediction
+        print sort_predict4[i][0]
+    print "predict 3 \n"
+    for i in range(len(sort_predict3)):
+        print sort_predict3[i][0]               #printing three word prediction
+    print "predict 2 \n"
+    for i in range(len(sort_predict2)):
+        print sort_predict2[i][0]               #printing two word prediction
+    print "predict 1 \n"
+    for i in range(len(sort_predict1)):
+        print sort_predict1[i][0]               #printing single word prediction
+
+    #clearing all the predict dictionaries
+    predict11.clear()
+    predict22.clear()
+    predict33.clear()
+    predict44.clear()
+
+
+def clear_console():
+    
+    clear = lambda: os.system('cls')            #clearing console
+    clear()
+
+
+def main():
+    
+    while True:                                 #infinite loop
+
+        print "\n"
+        print "input text:"
+        if(len(text)>0):
+            for i in text: print i,             #printing the text
+        g=raw_input().strip().lower()                   #prompting the user to input the text    
+        clear_console()                         #calling clear console                    
+        if g == "stop":                         #checking for stop                
+            break                               #breaking from the infinite loop    
+        if g not in main_dict.keys():           #checking for words not used in input text file
+            for i in text:                             #clearing the text list         
+                text.remove(i)
+            for i in xrange(len(text)):
+                text.pop()   
+            continue                                #continue next iteration
+        text.append(g)                          #else append the new input in to text
+        if len(text)>4:                         #cut shorting the text to four words                
+            del text[0]
+
+
+
+        predict()                               #calling predict
+        refine_predict()                        #calling refine_predict
+        create_predict_dict()                   #calling create_predict_dict
+        print_sort_dict()                       #calling print_sort_dict    
+        
+    print "stopped"
+
+    
+main()                                          #calling main function
