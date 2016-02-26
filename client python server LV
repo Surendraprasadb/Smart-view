@@ -1,0 +1,14 @@
+import socket
+
+clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+clientsocket.connect(('localhost', 6340))
+print "connected"
+while 1:
+    a=raw_input("enter text")
+    size=str(len(a))
+    
+    for i in xrange(4-len(size)):
+        size=" "+size   
+    a=size+a
+    clientsocket.send(a)
+    
