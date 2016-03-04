@@ -1,0 +1,185 @@
+#importing json for retriving dictionary from text file
+#importing operator for srting the dictionary
+#importing socket for establishing port communication
+#importing os for changing current directory
+import json
+import operator
+import socket
+import os
+main_dict={}
+
+#loading the dictionary from the text file
+try:
+    main_dict = json.load(open(r".\main_dict_recomenders.txt", "r"))
+except IOError:
+    main_dict = {}
+
+#reading the text file and retriving the filelist
+try:
+    a=open(r".\filelist.txt","r")
+    filelist=a.read().split("\n");
+except IOError:
+    filelist=[]
+
+#establishing connection using ports
+clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+clientsocket.connect(('localhost', 6340))
+
+#declaring dictionaries for storing output of different grams of words
+predict1={}
+predict2={}
+predict3={}
+predict4={}
+textlist=[]
+
+while 1:
+
+    #receiving first 10 bytes containing the size of the text to be received.
+    #and receive text of size as data received in the first 10 bytes.
+    recv_size=clientsocket.recv(10)
+    """#print recv_size"""
+    buf=clientsocket.recv(int(recv_size))
+    """print buf
+    print "\n"""
+    #converting the input text into list and storing it as textlist
+    textin=buf.strip()
+    textlist.append(textin)
+
+    """for i in textlist:
+        print i, 
+    print len(textlist)"""
+    #limiting the length of textlist to 4.
+    if len(textlist)>4:
+        del textlist[0]
+
+        
+    #upating the predict dictionary with the functions selected in the vi in which input function is also present.
+    #the weightage of the function will be the number of vi containing the same function.
+    #predict one will take only one function as input function
+    #predict two will take two functions as input function
+    #predict three will take three functions as input function
+    #predict four will take four functions as input function
+    for i in filelist:
+        if i in main_dict.keys():
+            if type(main_dict[i])==dict:
+                if textlist[len(textlist)-1] in main_dict[i].keys():
+                    for j in main_dict[i]:
+                        if j not in predict1.keys() :
+                            predict1.update({j:1})
+                        else:
+                            predict1[j] += 1
+
+                if len(textlist)>1:
+                    if textlist[len(textlist)-2] in main_dict[i].keys() and textlist[len(textlist)-1] in main_dict[i].keys():
+                        for j in main_dict[i]:
+                            if j not in predict2.keys() :
+                                predict2.update({j:1})
+                            else:
+                                predict2[j] += 1
+
+                if len(textlist)>2:
+                    if textlist[len(textlist)-3] in main_dict[i].keys() and textlist[len(textlist)-2] in main_dict[i].keys() and textlist[len(textlist)-1] in main_dict[i].keys():
+                        for j in main_dict[i]:
+                            if j not in predict3.keys() :
+                                predict3.update({j:1})
+                            else:
+                                predict3[j] += 1
+
+                if len(textlist)>3:
+                    if textlist[len(textlist)-4] in main_dict[i].keys() and textlist[len(textlist)-3] in main_dict[i].keys() and textlist[len(textlist)-2] in main_dict[i].keys() and textlist[len(textlist)-1] in main_dict[i].keys():
+                        for j in main_dict[i]:
+                            if j not in predict4.keys() :
+                                predict4.update({j:1})
+                            else:
+                                predict4[j] += 1
+
+
+    #removing the input functions from the predict list
+                                    
+    """#print "prediction completed"""
+    for i in textlist:
+        if i in predict1.keys():
+            del predict1[i]
+        if i in predict2.keys():
+            del predict2[i]
+        if i in predict3.keys():
+            del predict3[i]
+        if i in predict4.keys():
+            del predict4[i]
+
+    #checking for repeated keys and removing them
+    for i in predict2.keys():
+        for j in predict1.keys():
+            if i == j:                
+                del predict1[i]     
+                break
+            
+    for i in predict3.keys():
+        for j in predict2.keys():
+            if i == j:          
+                del predict2[i]    
+            
+    for i in predict4.keys():
+        for j in predict3.keys():
+            if i == j:               
+                del predict3[i]
+
+    """#print "refine completed"""
+    #sorting and storing the output in the form of a single string
+    
+    output=""
+    """#print "\n\n\npredict 4\n\n\n"""
+    sorted_predict4 = sorted(predict4.items(), key=operator.itemgetter(1))
+    sorted_predict4.reverse()
+    for i in xrange(len(sorted_predict4)):
+        if len(sorted_predict4[i][0])>2:
+            """#print sorted_predict4[i][0],sorted_predict4[i][1]"""
+            output += sorted_predict4[i][0]+","
+
+            
+    """#print "\n\n\npredict 3\n\n\n"""
+    sorted_predict3 = sorted(predict3.items(), key=operator.itemgetter(1))
+    sorted_predict3.reverse()
+    for i in xrange(len(sorted_predict3)):
+        if len(sorted_predict3[i][0])>2:
+            """#print sorted_predict3[i][0],sorted_predict3[i][1]"""
+            output += sorted_predict3[i][0]+","
+
+            
+    """#print "\n\n\npredict 2\n\n\n"""
+    sorted_predict2 = sorted(predict2.items(), key=operator.itemgetter(1))
+    sorted_predict2.reverse()
+    for i in xrange(len(sorted_predict2)):
+        if len(sorted_predict2[i][0])>2:
+            """#print sorted_predict2[i][0],sorted_predict2[i][1]"""
+            output += sorted_predict2[i][0]+","
+
+            
+    """#print "\n\n\npredict 1\n\n\n"""
+    sorted_predict1 = sorted(predict1.items(), key=operator.itemgetter(1))
+    sorted_predict1.reverse()
+    for i in xrange(len(sorted_predict1)):
+        if len(sorted_predict1[i][0])>2:
+            """#print sorted_predict1[i][0],sorted_predict1[i][1]"""
+            output += sorted_predict1[i][0]+","
+
+    """#print "printing output"""
+    output=str(output[:-1:])
+    
+    """#print output"""
+        
+    send_size=str(len(output))
+    """#print send_size """
+
+    #appending the size of output string infron of the output
+    for i in xrange(10-len(send_size)):
+        send_size=" "+send_size   
+    output=send_size+output
+    clientsocket.send(output)
+
+
+    #clearing all the predict dictionaries
+    predict1.clear()
+    predict2.clear()
+    predict3.clear()
+    predict4.clear()
