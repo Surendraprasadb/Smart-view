@@ -1,0 +1,44 @@
+#importing glob for accessing the list of files present.
+#importing json for dumping the dictionary in the text file.
+import glob
+import json
+main_dict = {}
+
+#creating a list of text files present in the current location
+filespresent=glob.glob(".\*.txt")
+filelist=[]
+for i in filespresent:
+    i=i[2::]
+    filelist.append(i)
+
+#writing the list of files present in to a new text file named filelist.txt
+fp=open(r".\filelist.txt","w")
+for i in filelist:
+    main_dict.update({i:{}})
+    fp.write(i)
+    fp.write("\n")
+fp.close()
+
+#creating a database
+#the format of database is a nested dictionary
+#The first step keys are the names of the main vi.
+#The second step keys are the functions inside the parent vi.
+#The second step values will be the weight-age of the corresponding function.
+
+for i in filelist:
+    print i
+    
+    a=open(i,'r')
+    read=a.readlines();
+    read=read[6::]
+    read="".join(read)
+    read=read.replace('\n',',')
+    read=read.split(",")
+    for j in read:
+        if j not in main_dict[i].keys():
+            main_dict[i].update({j:1})
+        else:
+            main_dict[i][j] +=1
+
+json.dump(main_dict, open(r".\main_dict_recomenders.txt",'w'))            
+print len(main_dict)
