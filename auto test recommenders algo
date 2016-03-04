@@ -1,0 +1,160 @@
+#importing json for loading the dictionary
+#importing os for changing current directory
+#importing operator for sorting the dictionary
+#importing random for selecting unput functions randomly
+#importing cprofile for tracking the profiling time
+import json
+import operator
+import os
+import random
+import cProfile
+main_dict={}
+
+#loading main dictionary from the text file
+main_dict=json.load(open(r".\main_dict_recomenders.txt","r"))
+"""#del main_dict[""]"""
+
+#reading file list
+a=open(r".\filelist.txt","r")
+filelist=a.read().split("\n");
+"""#print filelist"""
+predict1={}
+predict2={}
+predict3={}
+predict4={}
+textlist=[]
+funclist=[]
+
+
+#creating a list of all possible input functions
+for i in filelist:
+    if i in main_dict.keys():
+        for j in main_dict[i]:
+            funclist.append(j)
+"""for i in funclist:
+    print i
+"""
+print "len of funclist",len(funclist)
+
+#selecting a random function from the funclist
+def random_input1():
+    index = random.randint(0,len(funclist))
+    print index
+    return funclist[index%len(funclist)]
+    
+
+#main function for taking random functions as inputs and predicting the possible outcomes
+def main():
+    for i in xrange(10):
+        textin=random_input1()
+        textlist.append(textin)
+        """for i in textlist:
+            print i,""" 
+
+        if len(textlist)>4:
+            del textlist[0]
+        """#predict 1"""
+
+        
+        #upating the predict dictionary with the functions selected in the vi in which input function is also present.
+        #the weightage of the function will be the number of vi containing the same function.
+        #predict one will take only one function as input function
+        #predict two will take two functions as input function
+        #predict three will take three functions as input function
+        #predict four will take four functions as input function
+
+        
+        for i in filelist:
+            if i in main_dict.keys():
+                if type(main_dict[i])==dict:
+                    if textlist[len(textlist)-1] in main_dict[i].keys():
+                        for j in main_dict[i]:
+                            if j not in predict1.keys() :
+                                predict1.update({j:1})
+                            else:
+                                predict1[j] += 1
+
+                    if len(textlist)>1:
+                        if textlist[len(textlist)-2] in main_dict[i].keys() and textlist[len(textlist)-1] in main_dict[i].keys():
+                            for j in main_dict[i]:
+                                if j not in predict2.keys() :
+                                    predict2.update({j:1})
+                                else:
+                                    predict2[j] += 1
+
+                    if len(textlist)>2:
+                        if textlist[len(textlist)-3] in main_dict[i].keys() and textlist[len(textlist)-2] in main_dict[i].keys() and textlist[len(textlist)-1] in main_dict[i].keys():
+                            for j in main_dict[i]:
+                                if j not in predict3.keys() :
+                                    predict3.update({j:1})
+                                else:
+                                    predict3[j] += 1
+
+                    if len(textlist)>3:
+                        if textlist[len(textlist)-4] in main_dict[i].keys() and textlist[len(textlist)-3] in main_dict[i].keys() and textlist[len(textlist)-2] in main_dict[i].keys() and textlist[len(textlist)-1] in main_dict[i].keys():
+                            for j in main_dict[i]:
+                                if j not in predict4.keys() :
+                                    predict4.update({j:1})
+                                else:
+                                    predict4[j] += 1
+        
+        for i in predict2.keys():
+            for j in predict1.keys():
+                if i == j:                #checking for repeated keys                   
+                    del predict1[i]    #removing repeated keys  
+                    break
+                
+        for i in predict3.keys():
+            for j in predict2.keys():
+                if i == j:                #checking for repeated keys
+                    del predict2[i]    #removing repeated keys  
+                
+        for i in predict4.keys():
+            for j in predict3.keys():
+                if i == j:                #checking for repeated keys  
+                    del predict3[i]
+
+        
+        #sorting the output acording to the weight-age of the function
+        """#print "\n\n\npredict 4\n\n\n"""
+        sorted_predict4 = sorted(predict4.items(), key=operator.itemgetter(1))
+        sorted_predict4.reverse()
+        for i in xrange(len(sorted_predict4)):
+            if len(sorted_predict4[i][0])>2:
+                pass
+                """#print sorted_predict4[i][0],sorted_predict4[i][1]"""
+        
+        ""#print "\n\n\npredict 3\n\n\n"""
+        sorted_predict3 = sorted(predict3.items(), key=operator.itemgetter(1))
+        sorted_predict3.reverse()
+        for i in xrange(len(sorted_predict3)):
+            if len(sorted_predict3[i][0])>2:
+                pass
+                """#print sorted_predict3[i][0],sorted_predict3[i][1]"""
+
+        """#print "\n\n\npredict 2\n\n\n"""
+        sorted_predict2 = sorted(predict2.items(), key=operator.itemgetter(1))
+        sorted_predict2.reverse()
+        for i in xrange(len(sorted_predict2)):
+            if len(sorted_predict2[i][0])>2:
+                """#print sorted_predict2[i][0],sorted_predict2[i][1]"""
+                pass
+            
+        """#print "\n\n\npredict 1\n\n\n"""
+        sorted_predict1 = sorted(predict1.items(), key=operator.itemgetter(1))
+        sorted_predict1.reverse()
+        for i in xrange(len(sorted_predict1)):
+            if len(sorted_predict1[i][0])>2:
+                pass
+                """#print sorted_predict1[i][0],sorted_predict1[i][1]"""
+
+
+
+        #clearing all the predict dictionaries
+        predict1.clear()
+        predict2.clear()
+        predict3.clear()
+        predict4.clear()
+        
+#profiling the time required for running the main functions
+cProfile.run('main()')
